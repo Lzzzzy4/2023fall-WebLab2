@@ -168,8 +168,5 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 trash/
-.vscode/settings.json
-Examples/pss3e20-eda-which-makes-sense/pss3e20-eda-which-makes-sense.ipynb
-Examples/Rwanda_CO2_Step_by_step_guide/rwanda-co2-step-by-step-guide.ipynb
-report/report.bbl
-data/result.csv
+.vscode/
+data/freebase_douban.gz
