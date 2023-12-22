@@ -31,7 +31,8 @@ with gzip.open(path+'/../data/freebase_douban.gz', 'rb') as f:
         line = line.strip()
         triplet = line.decode().split('\t')[:3]
         if(i % 1000000 == 1):
-            print(triplet)
+            # print(triplet)
+            print(i/395577070 * 100 , '%')
         
         # if(i == 10000000):
         #     break
@@ -62,7 +63,7 @@ with gzip.open(path+'/../data/freebase_douban.gz', 'rb') as f:
             graph.loc[item1,'content'][relation].append(item2)
             graph.loc[item1,'count'] = graph.loc[item1,'count'] + 1
 
-    print(i)
+    print(i) #395577070
     # 过滤
     graph.insert(loc = 3,column = 'delete', value = 0)
     for index, row in graph.iterrows():
