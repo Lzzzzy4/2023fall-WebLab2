@@ -205,7 +205,9 @@ def train(args):
             metrics_cols.append('{}@{}'.format(m, k))
     metrics_df = pd.DataFrame(metrics_df).transpose()
     metrics_df.columns = metrics_cols
-    metrics_df.to_csv(args.save_dir + '/metrics.tsv', sep='\t', index=False)
+    metrics_df.to_csv(args.save_dir + '/metrics{:d}.tsv'.format(log_save_id),
+                      sep='\t',
+                      index=False)
 
     # print best metrics
     best_metrics = metrics_df.loc[metrics_df['epoch_idx'] ==

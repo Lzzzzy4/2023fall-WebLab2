@@ -23,7 +23,7 @@ def save_model(model, model_dir, log_save_id, current_epoch, last_best_epoch=Non
     if last_best_epoch is not None and current_epoch != last_best_epoch:
         old_model_state_file = os.path.join(model_dir, 'model{:d}_epoch{}.pth'.format(log_save_id, last_best_epoch))
         if os.path.exists(old_model_state_file):
-            os.system('del {}'.format(old_model_state_file))
+            os.system('del "{}'.format(old_model_state_file.replace('/', '\\')))
 
 
 def load_model(model, model_path):
