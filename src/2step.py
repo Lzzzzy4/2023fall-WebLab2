@@ -46,8 +46,8 @@ with gzip.open(path + '/../data/freebase_douban.gz', 'rb') as f:
     for line in f:
         i = i + 1
 
-        if(i < 350000000):
-            continue
+        # if(i < 350000000):
+        #     continue
 
         line = line.strip()
         triplet = line.decode().split('\t')[:3]
@@ -60,8 +60,8 @@ with gzip.open(path + '/../data/freebase_douban.gz', 'rb') as f:
             print("related items:", cnt)
             cnt = 0
 
-        if(i == 400000000):
-            break
+        # if(i == 400000000):
+        #     break
 
         patten = "<http://rdf.freebase.com/ns/"
         relation = triplet[1]
