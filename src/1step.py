@@ -41,7 +41,7 @@ with gzip.open(path + '/../data/freebase_douban.gz', 'rb') as f:
             print(i / 395577070 * 100, '%')
             last_time = (1 - i / 395577070) * (time.time() - st) / i * 395577070
             print("剩余时间：", datetime.timedelta(seconds=last_time))
-            print(cnt)
+            print("related items:", cnt)
             cnt = 0
         # if(i == 10000000):
         #     break

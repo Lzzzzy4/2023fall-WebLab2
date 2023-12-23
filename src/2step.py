@@ -12,8 +12,7 @@ path = os.path.dirname(__file__)
 graph = pd.read_json(path + '/../data/movie_graph.json',
                      encoding="utf-8",
                      orient='index')
-step1_list = graph[graph['is_movie'] == 0].index.tolist()
-step1_list = set(step1_list)
+step1_list = set(graph[graph['is_movie'] == 0].index.tolist())
 graph.insert(loc=3, column='is_first_step', value=1)
 
 #graph to dict
@@ -25,18 +24,18 @@ for index, row in graph.iterrows():
     for relation in row['content']:
         if relation not in relation_count:
             relation_count[relation] = 0
-        relation_count[relation] = relation_count[relation] + len()
-
+        relation_count[relation] = relation_count[relation] + len(row['content'][relation])
 delete_list = []
 for key in relation_count.keys():
-    if (relation_count[key] < 500):
+    if (relation_count[key] < 100):
         delete_list.append(key)
 for i in delete_list:
     relation_count.pop(i)
+relation_list = set(relation_count.keys())
 
-relation_list = list(relation_count.keys())
-relation_list = set(relation_list)
-print(len(step1_list), len(relation_list), len(graph))
+print("step1_list:", len(step1_list))
+print("relation_list:", len(relation_list))
+print("graph:", len(graph))
 
 st = time.time()
 
@@ -47,25 +46,27 @@ with gzip.open(path + '/../data/freebase_douban.gz', 'rb') as f:
     for line in f:
         i = i + 1
 
+        if(i < 350000000):
+            continue
+
         line = line.strip()
         triplet = line.decode().split('\t')[:3]
-        if (i % 100000 == 0):
+        if (i % 1000000 == 0):
 
             print(i / 395577070 * 100, '%')
             last_time = (1 - i / 395577070) * (time.time() -
                                                st) / i * 395577070
             print("剩余时间：", datetime.timedelta(seconds=last_time))
-            print(cnt)
-            print(len(graph))
+            print("related items:", cnt)
             cnt = 0
 
-        if(i == 1000000):
+        if(i == 400000000):
             break
 
         patten = "<http://rdf.freebase.com/ns/"
         relation = triplet[1]
-        if (relation not in relation_list):
-            continue
+        # if (relation not in relation_list): 这里先不过滤
+        #     continue
         if (patten != triplet[0][:len(patten)] or patten != triplet[2][:len(patten)]):
             continue
         item1 = triplet[0][len(patten):-1]
@@ -94,19 +95,19 @@ with gzip.open(path + '/../data/freebase_douban.gz', 'rb') as f:
 
     print(i)
     # 过滤
-    graph.insert(loc=4, column='delete', value=0)
-    for index, row in graph.iterrows():
-        if (row['is_first_step'] == 0 and row['count'] < 30):
-            graph.loc[index, 'delete'] = 1
-            continue
+    delete_list = []
+    for index in graph:
+        if (graph[index]['is_first_step'] == 0 and graph[index]['count'] < 30):
+            delete_list.append(index)
+
         # for key in row['content'].keys():
         #     if(len(row['content'][key]) < 3):
         #         row['content'].pop(key)
 
-    graph = graph[graph['delete'] == 0]
-    graph.drop(['delete'], axis=1, inplace=True)
-
-    graph.to_json(orient='index',
-                  path_or_buf='E:/1.json',
-                  force_ascii=False,
-                  indent=4)
+    for i in delete_list:
+        graph.pop(i)
+    
+    # json.dump(graph, open(path + '/../data/movie_graph_2step_origin.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=4)
+    json.dump(graph, open('E:/2step_8.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=4)
+    end = time.time()   
+    print("用时：", datetime.timedelta(seconds=end - st))
