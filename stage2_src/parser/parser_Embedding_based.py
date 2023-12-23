@@ -36,6 +36,8 @@ def parse_args():
 
     parser.add_argument('--KG_embedding_type', type=str, default='TransE',
                         help='Specify the type of the KG embedding from {TransE, TransR}.')
+    parser.add_argument("--inject_embedding_type", type=str, default="add",
+                        help="how to inject the kg embedding into cf embedding, from {add, concat, multiply}.")
 
     parser.add_argument('--kg_l2loss_lambda', type=float, default=1e-4,
                         help='Lambda when calculating KG l2 loss.')

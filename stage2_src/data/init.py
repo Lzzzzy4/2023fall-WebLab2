@@ -10,7 +10,7 @@ douban2fb = pd.read_csv(path + '/douban2fb.csv')
 
 movie_id_map = pd.read_csv(path + '/movie_id_map.csv')
 
-output = open(path + '/kg_final.txt', 'w')
+output = open(path + '/Douban/kg_final.txt', 'w')
 
 # trans movie_id_map to dict
 movie_id_map_dict = {}
@@ -43,4 +43,4 @@ for key in graph.keys():
                 movie_id_cnt += 1
             v = movie_id_dict[v]
             #output
-            output.write(str(u) + '\t' + str(r) + '\t' + str(v) + '\n')
+            output.write(str(u) + ' ' + str(r) + ' ' + str(v) + '\n')
