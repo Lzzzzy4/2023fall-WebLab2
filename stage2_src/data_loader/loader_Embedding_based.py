@@ -43,6 +43,9 @@ class DataLoader(DataLoaderBase):
         #    和字典 self.relation_dict，其中key为r, value为tuple(h, t)。
         self.kg_dict = collections.defaultdict(list)
         self.relation_dict = collections.defaultdict(list)
+        for index, row in self.kg_data.iterrows():
+            self.kg_dict[row['h']].append((row['t'], row['r']))
+            self.relation_dict[row['r']].append((row['h'], row['t']))
 
     def print_info(self, logging):
         logging.info('n_users:      %d' % self.n_users)
