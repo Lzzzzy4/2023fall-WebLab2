@@ -1,0 +1,180 @@
+\documentclass{ctexart}
+\usepackage{babel}
+\usepackage{anyfontsize}
+\usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{floatrow}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{listings}
+\usepackage{xcolor}
+\definecolor{teal}{RGB}{0,128,128}
+\setlist[itemize]{noitemsep}
+\lstset{
+    basicstyle          =   \sffamily,          % 基本代码风格
+    keywordstyle        =   \bfseries,          % 关键字风格
+    commentstyle        =   \rmfamily\itshape,  % 注释的风格，斜体
+    stringstyle         =   \ttfamily,  % 字符串风格
+    flexiblecolumns,                % 别问为什么，加上这个
+    numbers             =   left,   % 行号的位置在左边
+    showspaces          =   false,  % 是否显示空格，显示了有点乱，所以不现实了
+    numberstyle         =   \zihao{-5}\ttfamily,    % 行号的样式，小五号，tt等宽字体
+    showstringspaces    =   false,
+    captionpos          =   t,      % 这段代码的名字所呈现的位置，t指的是top上面
+    frame               =   lrtb,   % 显示边框
+}
+
+\lstdefinestyle{Python}{
+    language        =   Python, % 语言选Python
+    basicstyle      =   \zihao{-5}\ttfamily,
+    numberstyle     =   \zihao{-5}\ttfamily,
+    keywordstyle    =   \color{blue},
+    keywordstyle    =   [2] \color{teal},
+    stringstyle     =   \color{magenta},
+    commentstyle    =   \color{red}\ttfamily,
+    breaklines      =   true,   % 自动换行，建议不要写太长的行
+    columns         =   fixed,  % 如果不加这一句，字间距就不固定，很丑，必须加
+    basewidth       =   0.5em,
+}
+
+\title{\textbf{Web信息处理与应用实验报告}}
+\author{方驰正\ 来泽远\ 周瓯翔}
+
+\begin{document}
+\begin{sloppypar}
+
+\maketitle
+
+\section{成员}
+
+\begin{itemize}
+      \item 方驰正 PB21000163 组长
+      \item 来泽远 PB21000164
+      \item 周瓯翔 PB21000265
+\end{itemize}
+
+\section{实验介绍}
+
+\subsection{实验背景}
+知识图谱（KG）是一种用于表示和组织知识的图形化数据结构，旨在捕获现实世界中的实体、概念、关系和属性。它是一种语义网络，通过连接不同元素之间的关系来呈现信息，并允许计算机系统理解和推理这些信息。
+
+KG内部包含丰富的实体和关系信息，这些信息不仅能够强化对用户和物品之间关系的建模，同时也揭示了物品之间的多种相关性。举例来说，KG能展示两部电影是否由同一位导演执导，这种关联可以被利用来加强推荐系统对用户品味和喜好的理解。
+
+此外，KG还有助于解释用户的偏好。例如，系统能够将用户对某部电影的选择归因于该电影的主演或其他与该电影相关的因素。这种解释性的特点使得推荐系统能够更好地理解用户的行为，并为用户提供更具个性化和可信赖的推荐。
+\subsection{实验目的}
+本次实验中，我们将利用知识图谱的特性，设计并实现一个基于知识图谱的推荐系统。该系统将利用知识图谱中的实体和关系信息，为用户推荐与其历史行为相关的物品。
+
+在阶段一中，我们将从公开图谱中匹配指定电影对应的实体，并抽取合适的部分图谱，按照规则对抽取到的图谱进行处理。在阶段二中，我们基于豆瓣电影评分数据，结合阶段一所获得的图谱信息，进行可解释的、知识感知的个性化电影推荐。
+
+\section{实验环境}
+
+\begin{itemize}
+      \item 操作系统：Windows 11
+      \item 开发环境：jupyter notebook
+      \item 软件平台：visual studio code
+\end{itemize}
+
+\section{阶段一：图谱抽取}
+\subsection{建立链接}
+我们根据给出的连接信息文件\texttt{douban2fb.txt}，根据电影ID匹配对应的实体，核心代码如下：
+
+\begin{lstlisting}[style=Python]
+movie_tag = pd.read_csv(path + '/../data/Movie_tag.csv')
+douban2fb = pd.read_csv(path + '/../data/douban2fb.csv')
+df = pd.merge(movie_tag, douban2fb, how='inner', on='id')
+df.set_index('entity', inplace=True)
+df['tag'] = df['tag'].apply(lambda x: x.split(','))
+
+df.to_json(orient='index',
+           path_or_buf=path + '/../data/movie_entity.json',
+           force_ascii=False,
+           indent=4)
+\end{lstlisting}
+
+直接利用pandas的merge函数即可完成链接，之后将结果以json格式保存。
+
+\subsection{一跳子图}
+之后我们建立一跳子图，核心代码如下：
+
+\begin{lstlisting}[style=Python]
+with gzip.open(path + '/../data/freebase_douban.gz', 'rb') as f:
+      for line in f:
+          line = line.strip()
+          triplet = line.decode().split('\t')[:3]
+  
+          patten = "<http://rdf.freebase.com/ns/"
+          if (patten != triplet[0][:len(patten)] or patten != triplet[2][:len(patten)]):
+              continue
+          item1 = triplet[0][len(patten):-1]
+          item2 = triplet[2][len(patten):-1]
+          relation = triplet[1]
+  
+          # 一跳子图
+          if (item1 in movie_list):
+              cnt = cnt + 1
+              if (relation not in graph.loc[item1, 'content']):
+                  graph.loc[item1, 'content'][relation] = []
+              graph.loc[item1, 'content'][relation].append(item2)
+              graph.loc[item1, 'count'] = graph.loc[item1, 'count'] + 1
+          if (item2 in movie_list):
+              cnt = cnt + 1
+              if (item1 not in graph.index):
+                  graph.loc[item1] = [0, 0, {}]
+              if (relation not in graph.loc[item1, 'content']):
+                  graph.loc[item1, 'content'][relation] = []
+              graph.loc[item1, 'content'][relation].append(item2)
+              graph.loc[item1, 'count'] = graph.loc[item1, 'count'] + 1
+\end{lstlisting}
+
+我们使用DataFrame作为存储结构，以头节点为索引，每个节点包含一个计数器和一个字典，字典的键为关系，值为一个列表，列表中存储了与该节点有关系的节点，即尾节点。
+在建立二跳子图前，我们过滤一跳子图，删除出现次数小于20的非电影实体，以减小构建二跳子图的压力；对关系的过滤放在二跳子图之后一并进行。
+
+过滤后的一跳子图的大小约为6MB，其规模如表 \ref{tab:0} 所示。
+
+\begin{table}[h]
+      \centering
+      \caption{一跳子图规模\label{tab:0}}
+      \begin{tabular}{lllll}
+            \hline
+            \#                & 电影节点    & 一跳节点    & 总节点      & 关系          \\ \hline
+            种类数量          & 578         & 146         & 724         &  139          \\
+            出现总数          & 125488      & 13266       & 138754      & 138754        \\
+            平均次数          & 217.11      &90.86        & 191.65      & 998.23        \\
+            \hline
+      \end{tabular}
+\end{table}
+
+\subsection{二跳子图}
+核心代码与一跳子图类似，值得注意的是，二跳子图的数据量远大于一跳子图。经测试，我们发现DataFrame的loc方法复杂度较高，因此我们替换为使用红黑树维护的字典，以加速子图的构建。
+
+二跳子图建立后，其json文件约为2.94GB。我们删除新引入的且出现次数小于30的实体。并且遍历整个子图，删除出现次数小于50的关系。
+
+过滤后的二跳子图大小约为22MB，其规模如表 \ref{tab:1} 所示。
+
+\begin{table}[h]
+      \centering
+      \caption{二跳子图规模\label{tab:1}}
+      \begin{tabular}{llllll}
+            \hline
+            \#                & 电影节点    & 一跳节点    & 二跳节点  & 总节点          & 关系          \\ \hline
+            种类数量          & 578         & 146         & 5394      & 6118           &  56          \\
+            出现总数          & 145966      & 104376080   &182851     & 104704897      & 530115        \\
+            平均次数          & 252.54      & 714904.66   & 33.90      & 17114.23      & 9466.34        \\
+            \hline
+      \end{tabular}
+\end{table}
+
+\section{阶段二：知识感知推荐}
+
+\section{实验总结}
+
+
+\ctexset{bibname=参考资料}
+\begin{thebibliography}{100}
+      \bibitem{ref1}\href{https://www.kaggle.com/code/ambrosm/pss3e20-eda-which-makes-sense}{PSS3E20 EDA which makes sense}
+\end{thebibliography}
+
+\end{sloppypar}
+\end{document}
