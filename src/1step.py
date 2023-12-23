@@ -39,7 +39,8 @@ with gzip.open(path + '/../data/freebase_douban.gz', 'rb') as f:
         triplet = line.decode().split('\t')[:3]
         if (i % 1000000 == 0):
             print(i / 395577070 * 100, '%')
-            last_time = (1 - i / 395577070) * (time.time() - st) / i * 395577070
+            last_time = (1 - i / 395577070) * (time.time() -
+                                               st) / i * 395577070
             print("剩余时间：", datetime.timedelta(seconds=last_time))
             print("related items:", cnt)
             cnt = 0
@@ -47,7 +48,8 @@ with gzip.open(path + '/../data/freebase_douban.gz', 'rb') as f:
         #     break
 
         patten = "<http://rdf.freebase.com/ns/"
-        if (patten != triplet[0][:len(patten)] or patten != triplet[2][:len(patten)]):
+        if (patten != triplet[0][:len(patten)]
+                or patten != triplet[2][:len(patten)]):
             continue
         item1 = triplet[0][len(patten):-1]
         item2 = triplet[2][len(patten):-1]

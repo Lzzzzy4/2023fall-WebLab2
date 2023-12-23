@@ -27,14 +27,16 @@ class DataLoader(DataLoaderBase):
             kg_data 为 DataFrame 类型
         '''
         # 1. 为KG添加逆向三元组，即对于KG中任意三元组(h, r, t)，添加逆向三元组 (t, r+n_relations, h)，
-        n_relations =kg_data["r"].max() + 1
+        n_relations = kg_data["r"].max() + 1
         self.kg_data = kg_data
-        for i in range(len(kg_data)):
-            self.kg_data.loc[len(kg_data.index)]=pd.DataFrame([kg_data[i][2], kg_data[i][1] + n_relations, kg_data[i][0]],columns = kg_data.columns)
+        for index, row in kg_data.iterrows():
+            self.kg_data.loc[len(
+                kg_data.index)] = [row['t'], row['r'] + n_relations, row['h']]
 
         # 2. 计算关系数，实体数和三元组的数量
         self.n_relations = self.kg_data["r"].max() + 1
-        self.n_entities = max(self.kg_data["h"].max(), self.kg_data["t"].max()) + 1
+        self.n_entities = max(self.kg_data["h"].max(),
+                              self.kg_data["t"].max()) + 1
         self.n_kg_data = len(self.kg_data)
 
         # 3. 根据 self.kg_data 构建字典 self.kg_dict ，其中key为h, value为tuple(t, r)，
