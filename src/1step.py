@@ -34,7 +34,7 @@ with gzip.open(path+'/../data/freebase_douban.gz', 'rb') as f:
         i = i + 1
         line = line.strip()
         triplet = line.decode().split('\t')[:3]
-        if(i % 1000000 == 1):
+        if(i % 1000000 == 0):
             # print(triplet)
             print(i/395577070 * 100 , '%')
             last_time =(1-i/395577070) * (time.time() - st)/i * 395577070 
@@ -69,7 +69,6 @@ with gzip.open(path+'/../data/freebase_douban.gz', 'rb') as f:
     for index, row in graph.iterrows():
         if(row['is_movie'] == 0 and row['count'] < 20):
             graph.loc[index,'delete'] = 1
-            continue
 
     graph = graph[graph['delete'] == 0]
     graph.drop(['delete'],axis=1,inplace=True)
