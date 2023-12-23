@@ -108,6 +108,7 @@ with gzip.open(path + '/../data/freebase_douban.gz', 'rb') as f:
         graph.pop(i)
     
     # json.dump(graph, open(path + '/../data/movie_graph_2step_origin.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=4)
-    json.dump(graph, open('E:/2step_8.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=4)
+    json.dump(graph, open(path + '/../data/movie_graph_2step.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=4)
+    # json.dump(graph, open('E:/2step_8.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=4)
     end = time.time()   
     print("用时：", datetime.timedelta(seconds=end - st))
