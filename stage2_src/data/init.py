@@ -29,18 +29,18 @@ relation_cnt = 0
 
 for key in graph.keys():
     if key not in movie_id_dict.keys():
-        movie_id_cnt += 1
         movie_id_dict[key] = movie_id_cnt
+        movie_id_cnt += 1
     u = movie_id_dict[key]
     for relation in graph[key]['content'].keys():
         if relation not in relation_dict.keys():
-            relation_cnt += 1
             relation_dict[relation] = relation_cnt
+            relation_cnt += 1
         r = relation_dict[relation]
         for v in graph[key]['content'][relation]:
             if v not in movie_id_dict.keys():
-                movie_id_cnt += 1
                 movie_id_dict[v] = movie_id_cnt
+                movie_id_cnt += 1
             v = movie_id_dict[v]
             #output
             output.write(str(u) + '\t' + str(r) + '\t' + str(v) + '\n')
