@@ -173,3 +173,4 @@ data/freebase_douban.gz
 data/movie_graph_2step.json
 
 ~$*
+!/stage2_src/trained_model/**/*.log
