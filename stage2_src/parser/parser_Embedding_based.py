@@ -61,8 +61,8 @@ def parse_args():
 
     args = parser.parse_args()
 
-    save_dir = 'trained_model/{}/Embedding_based/dim{}_lr{}_l2{}_{}/'.format(
-        args.data_name, args.embed_dim, args.lr, args.cf_l2loss_lambda, args.KG_embedding_type)
+    save_dir = 'trained_model/{}/Embedding_based/dim{}_lr{}_l2{}_{}_{}/'.format(
+        args.data_name, args.embed_dim, args.lr, args.cf_l2loss_lambda, args.KG_embedding_type, args.inject_embedding_type)
     args.save_dir = save_dir
 
     return args
