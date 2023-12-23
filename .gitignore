@@ -170,3 +170,5 @@ cython_debug/
 trash/
 .vscode/
 data/freebase_douban.gz
+
+~$*
