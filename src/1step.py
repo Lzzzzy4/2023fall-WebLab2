@@ -15,7 +15,7 @@ df['tag'] = df['tag'].apply(lambda x: x.split(','))
 
 df.to_json(orient='index', path_or_buf=path+'/../data/movie_entity.json', force_ascii=False, indent=4)
 
-movie_list = df.index.tolist()
+movie_list = set(df.index.tolist())
 graph = copy.deepcopy( df.drop(['id','tag'],axis=1) )
 graph.insert(loc = 0,column = 'is_movie', value = 1)
 graph.insert(loc = 1,column = 'count', value = 0)
@@ -25,14 +25,17 @@ graph['content'] = graph['content'].apply(lambda x: {})
 
 with gzip.open(path+'/../data/freebase_douban.gz', 'rb') as f:
     i = 0
+    cnt = 0
     for line in f:
         # break
         i = i + 1
         line = line.strip()
         triplet = line.decode().split('\t')[:3]
-        if(i % 1000000 == 1):
+        if(i % 100000 == 1):
             # print(triplet)
             print(i/395577070 * 100 , '%')
+            print(cnt)
+            cnt = 0
         
         # if(i == 10000000):
         #     break
@@ -51,11 +54,13 @@ with gzip.open(path+'/../data/freebase_douban.gz', 'rb') as f:
 
         # 一跳子图
         if(item1 in movie_list):
+            cnt = cnt + 1
             if relation not in graph.loc[item1,'content'].keys():
                 graph.loc[item1,'content'][relation] = []
             graph.loc[item1,'content'][relation].append(item2)
             graph.loc[item1,'count'] = graph.loc[item1,'count'] + 1
         if(item2 in movie_list):
+            cnt = cnt + 1
             if (item1 not in graph.index):
                 graph.loc[item1] = [0,0,{}]
             if relation not in graph.loc[item1,'content'].keys():
@@ -79,13 +84,3 @@ with gzip.open(path+'/../data/freebase_douban.gz', 'rb') as f:
 
     graph.to_json(orient='index', path_or_buf=path+'/../data/movie_graph.json', force_ascii=False, indent=4)
         
-            
-
-
-
-        
-
-
-
-
-
