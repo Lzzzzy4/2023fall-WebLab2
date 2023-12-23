@@ -25,7 +25,7 @@ graph = copy.deepcopy(df.drop(['id', 'tag'], axis=1))
 graph.insert(loc=0, column='is_movie', value=1)
 graph.insert(loc=1, column='count', value=0)
 graph.insert(loc=2, column='content', value=None)
-graph['content'] = graph['content'].apply(lambda x: [])
+graph['content'] = graph['content'].apply(lambda x: {})
 # print(graph.head(5))
 
 st = time.time()
@@ -37,21 +37,17 @@ with gzip.open(path + '/../data/freebase_douban.gz', 'rb') as f:
         i = i + 1
         line = line.strip()
         triplet = line.decode().split('\t')[:3]
-        if (i % 1000000 == 1):
-            # print(triplet)
+        if (i % 1000000 == 0):
             print(i / 395577070 * 100, '%')
-            last_time = (1 - i / 395577070) * (time.time() -
-                                               st) / i * 395577070
+            last_time = (1 - i / 395577070) * (time.time() - st) / i * 395577070
             print("剩余时间：", datetime.timedelta(seconds=last_time))
             print(cnt)
             cnt = 0
-        continue
         # if(i == 10000000):
         #     break
 
         patten = "<http://rdf.freebase.com/ns/"
-        if (patten != triplet[0][:len(patten)]
-                or patten != triplet[2][:len(patten)]):
+        if (patten != triplet[0][:len(patten)] or patten != triplet[2][:len(patten)]):
             continue
         item1 = triplet[0][len(patten):-1]
         item2 = triplet[2][len(patten):-1]
@@ -60,13 +56,17 @@ with gzip.open(path + '/../data/freebase_douban.gz', 'rb') as f:
         # 一跳子图
         if (item1 in movie_list):
             cnt = cnt + 1
-            graph.loc[item1, 'content'].append((relation, item2))
+            if (relation not in graph.loc[item1, 'content']):
+                graph.loc[item1, 'content'][relation] = []
+            graph.loc[item1, 'content'][relation].append(item2)
             graph.loc[item1, 'count'] = graph.loc[item1, 'count'] + 1
         if (item2 in movie_list):
             cnt = cnt + 1
             if (item1 not in graph.index):
-                graph.loc[item1] = [0, 0, []]
-            graph.loc[item1, 'content'].append((relation, item2))
+                graph.loc[item1] = [0, 0, {}]
+            if (relation not in graph.loc[item1, 'content']):
+                graph.loc[item1, 'content'][relation] = []
+            graph.loc[item1, 'content'][relation].append(item2)
             graph.loc[item1, 'count'] = graph.loc[item1, 'count'] + 1
 
     print(i)  #395577070

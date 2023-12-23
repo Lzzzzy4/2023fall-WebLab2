@@ -22,10 +22,10 @@ graph.insert(loc=3, column='is_first_step', value=1)
 # 统计graph中所有关系的数量，过滤
 relation_count = {}
 for index, row in graph.iterrows():
-    for (relation,item2) in row['content']:
+    for relation in row['content']:
         if relation not in relation_count:
             relation_count[relation] = 0
-        relation_count[relation] = relation_count[relation] + 1
+        relation_count[relation] = relation_count[relation] + len()
 
 delete_list = []
 for key in relation_count.keys():
@@ -59,13 +59,14 @@ with gzip.open(path + '/../data/freebase_douban.gz', 'rb') as f:
             print(len(graph))
             cnt = 0
 
-        patten = "<http://rdf.freebase.com/ns/"
+        if(i == 1000000):
+            break
 
+        patten = "<http://rdf.freebase.com/ns/"
         relation = triplet[1]
         if (relation not in relation_list):
             continue
-
-        if (patten not in triplet[0] or patten not in triplet[2]):
+        if (patten != triplet[0][:len(patten)] or patten != triplet[2][:len(patten)]):
             continue
         item1 = triplet[0][len(patten):-1]
         item2 = triplet[2][len(patten):-1]
