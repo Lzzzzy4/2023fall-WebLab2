@@ -10,6 +10,7 @@
 \usepackage{longtable}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{booktabs}
 \definecolor{teal}{RGB}{0,128,128}
 \setlist[itemize]{noitemsep}
 \lstset{
@@ -136,13 +137,13 @@ with gzip.open(path + '/../data/freebase_douban.gz', 'rb') as f:
     \begin{table}[h]
         \centering
         \caption{一跳子图规模\label{tab:0}}
-        \begin{tabular}{lllll}
-            \hline
-            \#       & 电影节点 & 一跳节点 & 总节点 & 关系   \\ \hline
+        \begin{tabular}{ccccc}
+            \toprule
+            \#       & 电影节点 & 一跳节点 & 总节点 & 关系   \\ \midrule
             种类数量 & 578      & 146      & 724    & 139    \\
             出现总数 & 125488   & 13266    & 138754 & 138754 \\
             平均次数 & 217.11   & 90.86    & 191.65 & 998.23 \\
-            \hline
+            \bottomrule
         \end{tabular}
     \end{table}
 
@@ -156,13 +157,13 @@ with gzip.open(path + '/../data/freebase_douban.gz', 'rb') as f:
     \begin{table}[h]
         \centering
         \caption{二跳子图规模\label{tab:1}}
-        \begin{tabular}{llllll}
-            \hline
-            \#       & 电影节点 & 一跳节点  & 二跳节点 & 总节点    & 关系    \\ \hline
+        \begin{tabular}{cccccc}
+            \toprule
+            \#       & 电影节点 & 一跳节点  & 二跳节点 & 总节点    & 关系    \\ \midrule
             种类数量 & 578      & 146       & 5394     & 6118      & 56      \\
             出现总数 & 145966   & 104376080 & 182851   & 104704897 & 530115  \\
             平均次数 & 252.54   & 714904.66 & 33.90    & 17114.23  & 9466.34 \\
-            \hline
+            \bottomrule
         \end{tabular}
     \end{table}
 
@@ -281,6 +282,21 @@ elif self.inject_embedding_type == "multiply":
     \end{lstlisting}
     \end{enumerate}
 
+    \subsection{对比分析}
+    \begin{table}[h]
+        \centering
+        \caption{二跳子图规模\label{tab:3}}
+            \begin{tabular}{ccccccc}
+                \toprule
+                                  & \textbf{precision@5} & \textbf{recall@5} & \textbf{ndcg@5} & \textbf{precision@10} & \textbf{recall@10} & \textbf{ndcg@10} \\\midrule
+                \textbf{baseline} & 0.2966               & 0.06604           & 0.3110          & 0.2532                & 0.1094             & 0.2829           \\
+                \textbf{only KG}  & 0.3226               & 0.07585           & 0.3385          & 0.2743                & 0.1239             & 0.3083           \\
+                \textbf{concat}   & 0.3204               & 0.07696           & 0.3314          & 0.2830                & 0.1319             & 0.3118           \\
+                \textbf{add}      & 0.3266               & 0.07494           & 0.3372          & 0.2794                & 0.1263             & 0.3091           \\
+                \textbf{multiply} & 0.3177               & 0.07428           & 0.3268          & 0.2765                & 0.1237             & 0.3033           \\
+                \bottomrule
+            \end{tabular}
+    \end{table}
 
     \section{实验总结}
 
