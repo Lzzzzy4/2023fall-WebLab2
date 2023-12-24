@@ -27,8 +27,10 @@ class Embedding_based(nn.Module):
 
         self.cf_l2loss_lambda = args.cf_l2loss_lambda
         self.kg_l2loss_lambda = args.kg_l2loss_lambda
-
-        self.user_embed = nn.Embedding(self.n_users, self.embed_dim)
+        if self.inject_embedding_type == "concat":
+            self.user_embed = nn.Embedding(self.n_users, 2 * self.embed_dim)
+        else:
+            self.user_embed = nn.Embedding(self.n_users, self.embed_dim)
         self.item_embed = nn.Embedding(self.n_items, self.embed_dim)
         nn.init.xavier_uniform_(self.user_embed.weight)
         nn.init.xavier_uniform_(self.item_embed.weight)
@@ -120,18 +122,20 @@ class Embedding_based(nn.Module):
         """
         # return item_embed + item_kg_embed
         return F.normalize(F.normalize(item_embed) + F.normalize(item_kg_embed), p=2, dim=1)
+        # return F.normalize(item_kg_embed, p=2, dim=1)
     def inject_concat(self, item_embed, item_kg_embed):
         """
         item_embed:     (cf_batch_size, embed_dim)
         item_kg_embed:  (cf_batch_size, embed_dim)
         """
         concat_embed = torch.cat((F.normalize(item_embed), F.normalize(item_kg_embed)), dim=1)
-        fc1 = nn.Linear(2 * self.embed_dim, self.embed_dim)
-        fc2 = nn.Linear(self.embed_dim, self.embed_dim)
+        # fc1 = nn.Linear(2 * self.embed_dim, self.embed_dim)
+        # fc2 = nn.Linear(self.embed_dim, self.embed_dim)
         # 加入batchnorm
-        bn = nn.BatchNorm1d(self.embed_dim)
-        relu = nn.ReLU()
-        return F.normalize(relu(bn(fc2(relu(bn(fc1(concat_embed)))))), p=2, dim=1)
+        # bn = nn.BatchNorm1d(self.embed_dim)
+        # relu = nn.ReLU()
+        # return F.normalize(relu(bn(fc2(relu(bn(fc1(concat_embed)))))), p=2, dim=1)
+        return concat_embed
 
     def inject_multiply(self, item_embed, item_kg_embed):
         """
