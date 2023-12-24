@@ -118,8 +118,8 @@ class Embedding_based(nn.Module):
         item_embed:     (cf_batch_size, embed_dim)
         item_kg_embed:  (cf_batch_size, embed_dim)
         """
-        return item_embed + item_kg_embed
-
+        # return item_embed + item_kg_embed
+        return F.normalize(F.normalize(item_embed) + F.normalize(item_kg_embed), p=2, dim=1)
     def inject_concat(self, item_embed, item_kg_embed):
         """
         item_embed:     (cf_batch_size, embed_dim)
