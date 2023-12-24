@@ -174,3 +174,6 @@ data/movie_graph_2step.json
 
 ~$*
 !/stage2_src/trained_model/**/*.log
+*.fdb_latexmk
+*.fls
+*.xdv

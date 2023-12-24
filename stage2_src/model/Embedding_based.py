@@ -121,14 +121,18 @@ class Embedding_based(nn.Module):
         item_kg_embed:  (cf_batch_size, embed_dim)
         """
         # return item_embed + item_kg_embed
-        return F.normalize(F.normalize(item_embed) + F.normalize(item_kg_embed), p=2, dim=1)
+        return F.normalize(F.normalize(item_embed) +
+                           F.normalize(item_kg_embed),
+                           p=2,
+                           dim=1)
         # return F.normalize(item_kg_embed, p=2, dim=1)
     def inject_concat(self, item_embed, item_kg_embed):
         """
         item_embed:     (cf_batch_size, embed_dim)
         item_kg_embed:  (cf_batch_size, embed_dim)
         """
-        concat_embed = torch.cat((F.normalize(item_embed), F.normalize(item_kg_embed)), dim=1)
+        concat_embed = torch.cat(
+            (F.normalize(item_embed), F.normalize(item_kg_embed)), dim=1)
         # fc1 = nn.Linear(2 * self.embed_dim, self.embed_dim)
         # fc2 = nn.Linear(self.embed_dim, self.embed_dim)
         # 加入batchnorm
@@ -143,7 +147,10 @@ class Embedding_based(nn.Module):
         item_kg_embed:  (cf_batch_size, embed_dim)
         """
         # return item_embed * item_kg_embed
-        return F.normalize(F.normalize(item_embed) * F.normalize(item_kg_embed), p=2, dim=1)
+        return F.normalize(F.normalize(item_embed) *
+                           F.normalize(item_kg_embed),
+                           p=2,
+                           dim=1)
 
     def calc_cf_loss(self, user_ids, item_pos_ids, item_neg_ids):
         """
