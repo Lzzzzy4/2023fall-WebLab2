@@ -11,6 +11,8 @@
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{graphicx}
 \definecolor{teal}{RGB}{0,128,128}
 \setlist[itemize]{noitemsep}
 \lstset{
@@ -291,23 +293,30 @@ elif self.inject_embedding_type == "multiply":
     \subsection{对比分析}
     \begin{table}[h]
         \centering
-        \caption{不同注入方法的效果\label{tab:3}}
-            \begin{tabular}{ccccccc}
+        \caption{不同注入方法及嵌入模型的效果\label{tab:3}}
+        \resizebox{\linewidth}{!}{ 
+            \begin{tabular}{cccccccc}
                 \toprule
-                                  & \textbf{precision@5} & \textbf{recall@5} & \textbf{ndcg@5} & \textbf{precision@10} & \textbf{recall@10} & \textbf{ndcg@10} \\\midrule
-                \textbf{baseline} & 0.2966               & 0.06604           & 0.3110          & 0.2532                & 0.1094             & 0.2829           \\
-                \textbf{only KG}  & 0.3226               & 0.07585           & 0.3385          & 0.2743                & 0.1239             & 0.3083           \\
-                \textbf{concat}   & 0.3204               & 0.07696           & 0.3314          & 0.2830                & 0.1319             & 0.3118           \\
-                \textbf{add}      & 0.3266               & 0.07494           & 0.3372          & 0.2794                & 0.1263             & 0.3091           \\
-                \textbf{multiply} & 0.3177               & 0.07428           & 0.3268          & 0.2765                & 0.1237             & 0.3033           \\
+                \multicolumn{2}{l}{}                                                     & \textbf{precision@5} & \textbf{recall@5} & \textbf{ndcg@5} & \textbf{precision@10} & \textbf{recall@10} & \textbf{ndcg@10} \\\midrule
+                \multicolumn{2}{c}{\textbf{baseline}}                                    & 0.2966               & 0.06604           & 0.3110          & 0.2532                & 0.1094             & 0.2829           \\\midrule
+                \multicolumn{1}{c}{\multirow{4}{*}{\textbf{TransE}}} & \textbf{only KG}  & 0.3226               & 0.07585           & 0.3385          & 0.2743                & 0.1239             & 0.3083           \\
+                \multicolumn{1}{c}{}                                 & \textbf{concat}   & 0.3204               & 0.07696           & 0.3314          & 0.2830                & 0.1319             & 0.3118           \\
+                \multicolumn{1}{c}{}                                 & \textbf{add}      & 0.3266               & 0.07494           & 0.3372          & 0.2794                & 0.1263             & 0.3091           \\
+                \multicolumn{1}{c}{}                                 & \textbf{multiply} & 0.3177               & 0.07428           & 0.3268          & 0.2765                & 0.1237             & 0.3033           \\\midrule
+                \multirow{4}{*}{\textbf{TransR}}                     & \textbf{only KG}  & 0.3114               & 0.07438           & 0.3259          & 0.2727                & 0.1212             & 0.3029           \\
+                                                                     & \textbf{concat}   & 0.3195               & 0.07598           & 0.3272          & 0.2823                & 0.1325             & 0.3087           \\
+                                                                     & \textbf{add}      & 0.3159               & 0.07128           & 0.3295          & 0.2754                & 0.1219             & 0.3051           \\
+                                                                     & \textbf{multiply} & 0.3168               & 0.07508           & 0.3229          & 0.2756                & 0.1233             & 0.3004           \\
                 \bottomrule
             \end{tabular}
+        }
     \end{table}
 表 \ref{tab:3} 中的数据均来自与训练过程中出现的最优结果而非训练的最终结果。因为无论哪种模型均出现了不同程度的过拟合，因此训练的最终结果并不是最优结果。
 
-可以看到，我们通过知识图谱注入的方式，能够相当有效地提升推荐系统的性能。
+可以看到，我们通过知识图谱注入的方式，能够相当有效地提升推荐系统的性能。而嵌入模型的对比中，TransE模型的性能要优于TransR模型。这可能是TransE模型更简单，参数更少，更容易训练。
+也可能是因为TransR模型虽然更复杂，能够处理一些TransE处理不了的复杂关系，但是我们数据集中的关系并不复杂，或者我们数据集太小导致没有足够的数据来学习这些复杂的转换矩阵，那么TransR的性能可能就不如TransE。所以我们下面的讨论主要根据TransE开展。
 
-在precision@5、recall@5和ndcg@5指标上，通过相加的注入方式表现最好，其次是拼接的注入方式。在precision@10、recall@10和ndcg@10指标上，又变成了注入方式表现最好，其次是相加注入方式。
+由于训练出的实体向量和数量级上存在差距，我们在进行注入时进行了归一化，这大幅度提高了效果。在precision@5、recall@5和ndcg@5指标上，通过相加的注入方式表现最好，其次是拼接的注入方式。在precision@10、recall@10和ndcg@10指标上，又变成了注入方式表现最好，其次是相加注入方式。
 
 此处拼接采用的是直接拼接的方式，使得嵌入向量的维度翻倍，对应的，用户的嵌入向量也需要翻倍，这在某种意义上是增加了嵌入向量的维度，可能对于相乘和相加的方式而言不够公平。但是，我们认为这种方式更加符合直觉。我们也试验了先拼接再通过一个全连接网络将嵌入向量的维度降低一半的方式，但是效果并不好，因此我们最终选择了直接拼接的方式。事实证明，即使将直接相加和直接相乘的嵌入向量的维度翻倍，结果也并没有发生什么变化。
 
