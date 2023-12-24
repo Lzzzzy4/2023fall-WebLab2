@@ -258,6 +258,50 @@ def calc_kg_loss_TransE(self, h, r, pos_t, neg_t):
     loss = kg_loss + self.kg_l2loss_lambda * l2_loss
     return loss
     \end{lstlisting}
+    我们也实现了transR算法，核心代码如下所示：
+\begin{lstlisting}[style=python]
+def calc_kg_loss_TransR(self, h, r, pos_t, neg_t):
+    """
+    h:      (kg_batch_size)
+    r:      (kg_batch_size)
+    pos_t:  (kg_batch_size)
+    neg_t:  (kg_batch_size)
+    """
+    r_embed = self.relation_embed(r)  # (kg_batch_size, relation_dim)
+    W_r = self.trans_M[r]  # (kg_batch_size, embed_dim, relation_dim)
+
+    h_embed = self.entity_embed(h)  # (kg_batch_size, embed_dim)
+    pos_t_embed = self.entity_embed(pos_t)  # (kg_batch_size, embed_dim)
+    neg_t_embed = self.entity_embed(neg_t)  # (kg_batch_size, embed_dim)
+
+    # 1. 计算头实体，尾实体和负采样的尾实体在对应关系空间中的投影嵌入
+    r_mul_h = torch.bmm(h_embed.unsqueeze(1),
+                        W_r).squeeze(1)  # (kg_batch_size, relation_dim)
+    r_mul_pos_t = torch.bmm(pos_t_embed.unsqueeze(1), W_r).squeeze(
+        1)  # (kg_batch_size, relation_dim)
+    r_mul_neg_t = torch.bmm(neg_t_embed.unsqueeze(1), W_r).squeeze(
+        1)  # (kg_batch_size, relation_dim)
+
+    # 2. 对关系嵌入，头实体嵌入，尾实体嵌入，负采样的尾实体嵌入进行L2范数归一化
+    r_embed = F.normalize(r_embed, p=2, dim=1)
+    r_mul_h = F.normalize(r_mul_h, p=2, dim=1)
+    r_mul_pos_t = F.normalize(r_mul_pos_t, p=2, dim=1)
+    r_mul_neg_t = F.normalize(r_mul_neg_t, p=2, dim=1)
+
+    # 3. 分别计算正样本三元组 (h_embed, r_embed, pos_t_embed) 和负样本三元组 (h_embed, r_embed, neg_t_embed) 的得分
+    pos_score = torch.sum(torch.pow(r_mul_h + r_embed - r_mul_pos_t, 2),
+                          dim=1)  # (kg_batch_size)
+    neg_score = torch.sum(torch.pow(r_mul_h + r_embed - r_mul_neg_t, 2),
+                          dim=1)  # (kg_batch_size)
+
+    # 4. 使用 BPR Loss 进行优化，尽可能使负样本的得分大于正样本的得分
+    kg_loss = torch.mean(-1.0 * F.logsigmoid(neg_score - pos_score))
+
+    l2_loss = _L2_loss_mean(r_mul_h) + _L2_loss_mean(
+        r_embed) + _L2_loss_mean(r_mul_pos_t) + _L2_loss_mean(r_mul_neg_t)
+    loss = kg_loss + self.kg_l2loss_lambda * l2_loss
+    return loss
+\end{lstlisting}
 
     同时，通过相加，逐元素乘积，拼接的方式为物品嵌入注入图谱实体的语义信息。并通过命令行参数的形式选择注入类型。核心代码如下：
 
