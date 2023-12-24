@@ -194,8 +194,9 @@ for key in graph.keys():
 
     \subsection{图谱嵌入模型}
     基于给定的baseline框架，我们完成了基于图谱嵌入的模型。
-    \begin{enumerate}
-        \item 实现 KG 的构建。核心代码如下：
+
+         实现 KG 的构建。核心代码如下：
+
         \begin{lstlisting}[style=python]
 # 1. 为KG添加逆向三元组，即对于KG中任意三元组(h, r, t)，添加逆向三元组 (t, r+n_relations, h)
 n_relations = kg_data["r"].max() + 1
@@ -219,7 +220,9 @@ for index, row in self.kg_data.iterrows():
     self.relation_dict[row['r']].append((row['h'], row['t']))
             
         \end{lstlisting}
-        \item 实现transE算法。核心代码如下所示：
+
+         实现transE算法。核心代码如下所示：
+
     \begin{lstlisting}[style=python]
 def calc_kg_loss_TransE(self, h, r, pos_t, neg_t):
     """
@@ -255,7 +258,9 @@ def calc_kg_loss_TransE(self, h, r, pos_t, neg_t):
     loss = kg_loss + self.kg_l2loss_lambda * l2_loss
     return loss
     \end{lstlisting}
-    \item 同时，通过相加，逐元素乘积，拼接的方式为物品嵌入注入图谱实体的语义信息。并通过命令行参数的形式选择注入类型。核心代码如下：
+
+    同时，通过相加，逐元素乘积，拼接的方式为物品嵌入注入图谱实体的语义信息。并通过命令行参数的形式选择注入类型。核心代码如下：
+
     \begin{lstlisting}[style=python]        
 def inject_add(self, item_embed, item_kg_embed):
     return F.normalize(F.normalize(item_embed) +
@@ -284,7 +289,6 @@ elif self.inject_embedding_type == "multiply":
     \end{lstlisting}
 
     此处为了保证注入的语义信息不会过大或过小，我们对注入的语义信息和原本的物品嵌入向量都进行了L2范数归一化。事实证明，这确实能够大幅度提升推荐系统的性能。
-    \end{enumerate}
 
     \subsection{对比分析}
     \begin{table}[h]
@@ -323,10 +327,10 @@ elif self.inject_embedding_type == "multiply":
 
     我们通过实验验证了知识图谱的有效性，同时也发现了知识图谱的不足之处。在实验中，我们发现，知识图谱的构建与抽取是一个非常耗费时间耗费计算资源的过程，这也导致了知识图谱的构建成本较高。但与此同时，我们耗费大量计算资源抽取到的有效信息并不多，以至于很容易就能出现过拟合的现象。同时，知识图谱中的实体和关系的质量参差不齐，这导致了知识图谱的有效性受到了一定的影响。这些问题共同导致了没有能够使得加入知识图谱数据后的推荐系统的性能有预期的大幅度提升。
 
-    \ctexset{bibname=参考资料}
-    \begin{thebibliography}{100}
-        \bibitem{ref1}\href{https://www.kaggle.com/code/ambrosm/pss3e20-eda-which-makes-sense}{PSS3E20 EDA which makes sense}
-    \end{thebibliography}
+    % \ctexset{bibname=参考资料}
+    % \begin{thebibliography}{100}
+    %     \bibitem{ref1}\href{https://www.kaggle.com/code/ambrosm/pss3e20-eda-which-makes-sense}{PSS3E20 EDA which makes sense}
+    % \end{thebibliography}
 
 \end{sloppypar}
 \end{document}
